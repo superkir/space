@@ -18,13 +18,17 @@ pygame.mixer.music.play(-1)
 
 fire_snd = pygame.mixer.Sound("fire.ogg")
 
-
 #задай фон сцени
 background = pygame.image.load("galaxy.jpg")
 background = pygame.transform.scale(background, (wind_w, wind_h))
 
 background1 = pygame.image.load("space1.png")
 background1 = pygame.transform.scale(background1, (wind_w, wind_h))
+try:
+    with open("record.txt", "r", encoding="Utf-8") as file:
+        record = int(file.read())
+except:
+    print(record)
 
 class Sprite:
     def __init__(self, x, y, w, h, image):
@@ -89,8 +93,8 @@ for i in range(10):
     enemies.append(Enemy(randint(0, wind_w-70), randint(-250, -50), 70, 50, enemy_img, 4))
 
 font = pygame.font.SysFont("Arial", 80)
-lose = font.render("You Lose!", True, (0, 0, 250))
-win = font.render("You Win!", True, (150, 100, 200))
+lose = font.render("You Lose!", True, (0, 255, 0))
+win = font.render("You Win!", True, (255, 0, 0))
 
 
 points = 0
@@ -102,6 +106,12 @@ lost_lb = font_stat.render(f"пропущенно: {lost}", True, (255, 255, 255
 
 but_img = pygame.image.load("button.png")
 button = Sprite(200, 200, 200, 50, but_img)
+
+def new_record(record, score):
+    if record < score:
+        with open("record.txt", "w", encoding="Utf-8") as file:
+            file.write(str(score))
+        window.blit(font_stat.render(f"Новий рекорд {score}", True, (255, 255, 255)), (200, 0))
 
 finish = False
 game = True
@@ -118,15 +128,21 @@ while game:
         window.blit(background, (0, 0))
         window.blit(points_lb, (0, 0))
         window.blit(lost_lb, (0, 50))
+    
+        if lost == 5:
+            window.blit(lose, (215, 120))
+            finish = True
+            new_record(record, points)
 
+        if points == 100:
+            window.blit(win, (215, 120))
+            finish = True
+
+            
         for enemy in enemies:
-            if lost == 5:
-                window.blit(lose, (215, 120))
-                finish = True
+            
 
-            if points == 100:
-                window.blit(win, (215, 120))
-                finish = True
+            
 
             enemy.draw()
             enemy.move()
@@ -149,12 +165,20 @@ while game:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             game = False
-
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
             player.fire()
-        #if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-           #player = Player(0, 400, 50, 50, pygame.image.load("sprite1.png"), 5)
-            #finish = False
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN and finish:
+            player = Player(0, 400, 50, 50, pygame.image.load("rocket.png"), 15)
+            finish = False
+            points = 0
+            lost = 0
+            enemies.clear()
+            bullets.clear()
+            for i in range(10):
+                enemies.append(Enemy(randint(0, wind_w-70), randint(-250, -50), 70, 50, enemy_img, 4))
+            points_lb = font_stat.render(f"вбито: {points}", True,(255, 255, 255))
+            lost_lb = font_stat.render(f"пропущенно: {lost}", True, (255, 255, 255))
+
         if menu and event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             x, y, = event.pos 
             if button.rect.collidepoint(x, y):
@@ -163,5 +187,5 @@ while game:
                 pygame.mixer.music.load("space.ogg")
                 pygame.mixer.music.play(-1)
 
-    pygame.display.update()
+    
     clock.tick(FPS)
