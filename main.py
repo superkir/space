@@ -88,11 +88,10 @@ bullets = []
 for i in range(10):
     enemies.append(Enemy(randint(0, wind_w-70), randint(-250, -50), 70, 50, enemy_img, 4))
 
+font = pygame.font.SysFont("Arial", 80)
+lose = font.render("You Lose!", True, (0, 0, 250))
+win = font.render("You Win!", True, (150, 100, 200))
 
-#lose = font.render("You Lose!", True, (0, 0, 250))
-#win = font.render("You Win!", True, (150, 100, 200))
-#lose1 = font1.render("Press SPACE to play again", True, (255, 255, 102))
-#win1 = font1.render("Press SPACE to play again", True, (255, 255, 102))
 
 points = 0
 lost = 0
@@ -121,6 +120,14 @@ while game:
         window.blit(lost_lb, (0, 50))
 
         for enemy in enemies:
+            if lost == 5:
+                window.blit(lose, (215, 120))
+                finish = True
+
+            if points == 100:
+                window.blit(win, (215, 120))
+                finish = True
+
             enemy.draw()
             enemy.move()
             for bullet in bullets:
